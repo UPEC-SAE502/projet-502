@@ -1,0 +1,37 @@
+version: '3.8' #faire "docker -v" voir la version et comparer sur https://docs.docker.com/compose/compose-file/compose-file-v2/
+
+services: #service que l'on veut dans notre docker
+  php:
+    image: php:8.2-apache #nom de l'image que l'on veut
+    container_name : php-8.2 #le nom de notre container
+    ports:
+      - 8080:80 #Change le port de base : le port d'origine est 80 et nous voulons 8080 donc : 8080:80
+     #Il faut ensuite entrer dans notre terminal : docker-compose (nom de notre fichier) up : docker-compose up
+
+     #Au préalable faire un sudo chown -R @user @file_path pour avoir les droits sur le fichier
+    volumes: # Pour spécifier un dossier
+      - ./sites-sae:/var/www/html # Nous disons que notre dossier doit être lu dans le dossier apache2 pour nous afficher une page web qui se situe dans notre dossier "sites-sae"
+    build:
+      context: . 
+      dockerfile: php.dockerfile  #IMPORTANT : Pour que les extensions s'installes lancer la commande : docker-compose up --build, sans le build le docker s'installera sans prendre en compte notre dossier @php.dockerfile
+  dbmysql:
+      image: mysql:8.0
+      container_name: mysql-8.0
+      command: --default-authentication-plugin=mysql_native_password
+      environment:
+        MYSQL_ROOT_PASSWORD: vitrygtr
+        MYSQL_DATABASE: web
+        MYSQL_USER: admin
+        MYSQL_PASSWORD: admin
+  phpadmin:
+      image: phpmyadmin:5.2.1-apache
+      container_name: phpmyadmin
+      environment:
+        PMA_ARBITRARY: 1
+        PMA_HOST : dbmysql
+        PMA_USER: admin
+        PMA_PASSWORD: admin
+        UPLOAD_LIMIT: 20M
+      ports:
+       - 8081:80 
+      
